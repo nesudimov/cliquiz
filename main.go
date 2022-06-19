@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"log"
@@ -14,19 +15,33 @@ type problem struct {
 }
 
 type quiz struct {
-	problems []problem
-	score    int
+	problems    []problem
+	playerScore int
+	totalScore  int
 }
 
-func (qz *quiz) MakeQuiz(content string) {
-	rows := strings.Split(content, "\n")
-	for _, row := range rows {
+func (qz *quiz) MakeQuiz(problems [][]string) {
+	for _, pr := range problems {
 		qz.problems = append(
 			qz.problems,
 			problem{
-				q: strings.Split(row, ",")[0],
-				a: strings.Split(row, ",")[1],
+				q: strings.TrimSpace(pr[0]),
+				a: strings.TrimSpace(pr[1]),
 			})
+	}
+	qz.playerScore = 0
+	qz.totalScore = len(qz.problems)
+}
+
+func (qz *quiz) runQuiz() {
+	var in string
+	for n, p := range qz.problems {
+		in = ""
+		fmt.Printf("Problem #%d: %s = ", n+1, p.q)
+		fmt.Scanf("%s\n", &in)
+		if in == p.a {
+			qz.playerScore++
+		}
 	}
 }
 
@@ -39,5 +54,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(strings.Split(string(content), "\n")[2])
+	r := csv.NewReader(strings.NewReader(string(content)))
+
+	problems, err := r.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var q quiz
+	q.MakeQuiz(problems)
+	q.runQuiz()
+
+	fmt.Printf("You scored %d out of %d.\n", q.playerScore, q.totalScore)
 }
