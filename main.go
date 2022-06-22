@@ -49,7 +49,7 @@ problemLoop:
 
 		select {
 		case <-qz.timer.C:
-			qz.printScore()
+			fmt.Println()
 			break problemLoop
 		case answer := <-answerCh:
 			if answer == p.a {
