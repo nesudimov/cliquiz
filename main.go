@@ -10,6 +10,27 @@ import (
 	"time"
 )
 
+func main() {
+	var quizFile = flag.String("f", "problems.csv", "file in the format of 'question,answer'")
+	var timeLimit = flag.Int("t", 0, "the time limit for the quiz in second")
+	flag.Parse()
+
+	content, err := os.ReadFile(*quizFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r := csv.NewReader(strings.NewReader(string(content)))
+
+	problems, err := r.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	q := MakeQuiz(problems, *timeLimit)
+	q.runQuiz()
+}
+
 type problem struct {
 	q string
 	a string
@@ -22,7 +43,9 @@ type quiz struct {
 	timer       *time.Timer
 }
 
-func (qz *quiz) MakeQuiz(problems [][]string, timeLimit int) {
+// Quiz constructor
+func MakeQuiz(problems [][]string, timeLimit int) *quiz {
+	qz := new(quiz)
 	for _, pr := range problems {
 		qz.problems = append(
 			qz.problems,
@@ -33,7 +56,15 @@ func (qz *quiz) MakeQuiz(problems [][]string, timeLimit int) {
 	}
 	qz.playerScore = 0
 	qz.totalScore = len(qz.problems)
-	qz.timer = time.NewTimer(time.Duration(timeLimit) * time.Second)
+
+	if timeLimit != 0 {
+		qz.timer = time.NewTimer(time.Duration(timeLimit) * time.Second)
+	} else {
+		c := make(chan time.Time)
+		qz.timer = &time.Timer{C: c}
+	}
+
+	return qz
 }
 
 func (qz *quiz) runQuiz() {
@@ -62,26 +93,4 @@ problemLoop:
 
 func (qz *quiz) printScore() {
 	fmt.Printf("You scored %d out of %d.\n", qz.playerScore, qz.totalScore)
-}
-
-func main() {
-	var quizFile = flag.String("f", "problems.csv", "file in the format of 'question,answer'")
-	var timeLimit = flag.Int("t", 30, "the time limit for the quiz in second")
-	flag.Parse()
-
-	content, err := os.ReadFile(*quizFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	r := csv.NewReader(strings.NewReader(string(content)))
-
-	problems, err := r.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var q quiz
-	q.MakeQuiz(problems, *timeLimit)
-	q.runQuiz()
 }
