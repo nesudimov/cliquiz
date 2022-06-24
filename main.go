@@ -11,8 +11,9 @@ import (
 )
 
 func main() {
-	var quizFile = flag.String("f", "problems.csv", "file in the format of 'question,answer'")
-	var timeLimit = flag.Int("t", 0, "the time limit for the quiz in second")
+	var quizFile = flag.String("file", "problems.csv", "file in the format of 'question,answer'")
+	var qTime = flag.Int("qtime", 0, "the time limit for the quiz in second")
+	var pTime = flag.Int("ptime", 0, "the time limit for each problem in second")
 	flag.Parse()
 
 	content, err := os.ReadFile(*quizFile)
@@ -27,8 +28,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	q := MakeQuiz(problems, *timeLimit)
-	q.runQuiz()
+	q := NewQuiz(problems)
+	q.runQuiz(*qTime, *pTime)
 }
 
 type problem struct {
@@ -44,7 +45,7 @@ type quiz struct {
 }
 
 // Quiz constructor
-func MakeQuiz(problems [][]string, timeLimit int) *quiz {
+func NewQuiz(problems [][]string) *quiz {
 	qz := new(quiz)
 	for _, pr := range problems {
 		qz.problems = append(
@@ -56,21 +57,19 @@ func MakeQuiz(problems [][]string, timeLimit int) *quiz {
 	}
 	qz.playerScore = 0
 	qz.totalScore = len(qz.problems)
-
-	if timeLimit != 0 {
-		qz.timer = time.NewTimer(time.Duration(timeLimit) * time.Second)
-	} else {
-		c := make(chan time.Time)
-		qz.timer = &time.Timer{C: c}
-	}
+	qz.timer = &time.Timer{C: make(chan time.Time)}
 
 	return qz
 }
 
-func (qz *quiz) runQuiz() {
+func (qz *quiz) runQuiz(qt int, pt int) {
+	qz.MakeQPTimer(qt)
 	answerCh := make(chan string)
 problemLoop:
 	for n, p := range qz.problems {
+
+		qz.MakeQPTimer(pt)
+
 		fmt.Printf("Problem #%d: %s = ", n+1, p.q)
 		go func() {
 			var in string
@@ -80,7 +79,7 @@ problemLoop:
 
 		select {
 		case <-qz.timer.C:
-			fmt.Println()
+			fmt.Println("#### time is over ####")
 			break problemLoop
 		case answer := <-answerCh:
 			if answer == p.a {
@@ -93,4 +92,12 @@ problemLoop:
 
 func (qz *quiz) printScore() {
 	fmt.Printf("You scored %d out of %d.\n", qz.playerScore, qz.totalScore)
+}
+
+// MakeQPTimer receives the duration of the timer in seconds (t).
+// If t is non-zero, creates a new timer with duration t
+func (qz *quiz) MakeQPTimer(t int) {
+	if t != 0 {
+		qz.timer = time.NewTimer(time.Duration(t) * time.Second)
+	}
 }
