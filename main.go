@@ -68,10 +68,10 @@ func MakeQuiz(problems [][]string, timeLimit int) *quiz {
 }
 
 func (qz *quiz) runQuiz() {
+	answerCh := make(chan string)
 problemLoop:
 	for n, p := range qz.problems {
 		fmt.Printf("Problem #%d: %s = ", n+1, p.q)
-		answerCh := make(chan string)
 		go func() {
 			var in string
 			fmt.Scanf("%s\n", &in)
