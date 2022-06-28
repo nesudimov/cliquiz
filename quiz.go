@@ -33,6 +33,9 @@ func NewQuiz(problems [][]string) *quiz {
 	return qz
 }
 
+// QuizHandler handles timer and answer channels.
+// If data arrives in the timer channel, displays "time is over" and returns false.
+// If data arrives in the answer channel, increment score if answer is equal to problem.a and return true.
 func (qz *quiz) QuizHandler(pNum int) bool {
 	select {
 	case <-qz.timer.C:

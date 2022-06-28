@@ -5,12 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
-	quizFile, qTime, pTime := parseFlags()
+	quizFile, qTime, pTime, randomizeP := parseFlags()
 
 	content, err := os.ReadFile(quizFile)
 	if err != nil {
@@ -22,6 +24,13 @@ func main() {
 	problems, err := r.ReadAll()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if randomizeP {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(problems), func(i, j int) {
+			problems[i], problems[j] = problems[j], problems[i]
+		})
 	}
 
 	q := NewQuiz(problems)
@@ -48,11 +57,12 @@ problemLoop:
 }
 
 // parseFlags parses the cli flags from os.Args[1:] and return their values
-func parseFlags() (string, int, int) {
+func parseFlags() (string, int, int, bool) {
 	var quizFile = flag.String("file", "problems.csv", "file in the format of 'question,answer'")
 	var qTime = flag.Int("qtime", 0, "the time limit for the quiz in second")
 	var pTime = flag.Int("ptime", 0, "the time limit for each problem in second")
+	var randomizeP = flag.Bool("randomize", false, "enables random display of tasks")
 	flag.Parse()
 
-	return *quizFile, *qTime, *pTime
+	return *quizFile, *qTime, *pTime, *randomizeP
 }
