@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"math/rand"
 	"time"
 )
 
@@ -15,16 +15,17 @@ type quiz struct {
 }
 
 // Quiz constructor
-func NewQuiz(problems [][]string) *quiz {
+func NewQuiz(qf QuizFile, randomizeP bool) *quiz {
 	qz := new(quiz)
-	for _, pr := range problems {
-		qz.problems = append(
-			qz.problems,
-			problem{
-				q: strings.ToLower(strings.TrimSpace(pr[0])),
-				a: strings.ToLower(strings.TrimSpace(pr[1])),
-			})
+
+	qz.problems, _ = qf.LoadProblem()
+	if randomizeP {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(qz.problems), func(i, j int) {
+			qz.problems[i], qz.problems[j] = qz.problems[j], qz.problems[i]
+		})
 	}
+
 	qz.playerScore = 0
 	qz.totalScore = len(qz.problems)
 	qz.timer = &time.Timer{C: make(chan time.Time)}

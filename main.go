@@ -5,11 +5,37 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"strings"
-	"time"
 )
+
+type QuizFile interface {
+	LoadProblem() ([]problem, error)
+}
+
+type CsvFile struct {
+	r *csv.Reader
+}
+
+func (cf *CsvFile) LoadProblem() ([]problem, error) {
+
+	problems, err := cf.r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var p []problem
+	for _, pr := range problems {
+		p = append(
+			p,
+			problem{
+				q: strings.ToLower(strings.TrimSpace(pr[0])),
+				a: strings.ToLower(strings.TrimSpace(pr[1])),
+			})
+	}
+
+	return p, nil
+}
 
 func main() {
 	quizFile, qTime, pTime, randomizeP := parseFlags()
@@ -19,22 +45,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	r := csv.NewReader(strings.NewReader(string(content)))
-
-	problems, err := r.ReadAll()
-	if err != nil {
-		log.Fatal(err)
+	file := new(CsvFile)
+	ext := strings.Split(quizFile, ".")
+	switch ext[len(ext)-1] {
+	case "csv":
+		file.r = csv.NewReader(strings.NewReader(string(content)))
 	}
 
-	if randomizeP {
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(problems), func(i, j int) {
-			problems[i], problems[j] = problems[j], problems[i]
-		})
-	}
-
-	q := NewQuiz(problems)
-
+	q := NewQuiz(file, randomizeP)
 	q.MakeQPTimer(qTime)
 problemLoop:
 	for n, p := range q.problems {
