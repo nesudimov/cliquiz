@@ -45,7 +45,7 @@ problemLoop:
 		go func() {
 			var in string
 			fmt.Scanf("%s\n", &in)
-			q.answerCh <- in
+			q.answerCh <- strings.ToLower(in)
 		}()
 
 		if !q.QuizHandler(n) {

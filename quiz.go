@@ -21,8 +21,8 @@ func NewQuiz(problems [][]string) *quiz {
 		qz.problems = append(
 			qz.problems,
 			problem{
-				q: strings.TrimSpace(pr[0]),
-				a: strings.TrimSpace(pr[1]),
+				q: strings.ToLower(strings.TrimSpace(pr[0])),
+				a: strings.ToLower(strings.TrimSpace(pr[1])),
 			})
 	}
 	qz.playerScore = 0
