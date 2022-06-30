@@ -11,34 +11,6 @@ import (
 	internal "github.com/nesudimov/cliquiz/internal"
 )
 
-type QuizFile interface {
-	LoadProblem() ([]internal.Problem, error)
-}
-
-type CsvFile struct {
-	r *csv.Reader
-}
-
-func (cf *CsvFile) LoadProblem() ([]internal.Problem, error) {
-
-	problems, err := cf.r.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	var p []internal.Problem
-	for _, pr := range problems {
-		p = append(
-			p,
-			internal.Problem{
-				Q: strings.ToLower(strings.TrimSpace(pr[0])),
-				A: strings.ToLower(strings.TrimSpace(pr[1])),
-			})
-	}
-
-	return p, nil
-}
-
 func main() {
 	quizFile, qTime, pTime, randomizeP := parseFlags()
 
@@ -47,11 +19,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	file := new(CsvFile)
+	file := new(internal.CsvFile)
 	ext := strings.Split(quizFile, ".")
 	switch ext[len(ext)-1] {
 	case "csv":
-		file.r = csv.NewReader(strings.NewReader(string(content)))
+		file.R = csv.NewReader(strings.NewReader(string(content)))
 	}
 
 	q := internal.NewQuiz(file, randomizeP)
