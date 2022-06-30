@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -7,29 +7,29 @@ import (
 )
 
 type quiz struct {
-	problems    []problem
-	playerScore int
-	totalScore  int
-	timer       *time.Timer
-	answerCh    chan string
+	Problems    []Problem
+	PlayerScore int
+	TotalScore  int
+	Timer       *time.Timer
+	AnswerCh    chan string
 }
 
 // Quiz constructor
 func NewQuiz(qf QuizFile, randomizeP bool) *quiz {
 	qz := new(quiz)
 
-	qz.problems, _ = qf.LoadProblem()
+	qz.Problems, _ = qf.LoadProblem()
 	if randomizeP {
 		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(qz.problems), func(i, j int) {
-			qz.problems[i], qz.problems[j] = qz.problems[j], qz.problems[i]
+		rand.Shuffle(len(qz.Problems), func(i, j int) {
+			qz.Problems[i], qz.Problems[j] = qz.Problems[j], qz.Problems[i]
 		})
 	}
 
-	qz.playerScore = 0
-	qz.totalScore = len(qz.problems)
-	qz.timer = &time.Timer{C: make(chan time.Time)}
-	qz.answerCh = make(chan string)
+	qz.PlayerScore = 0
+	qz.TotalScore = len(qz.Problems)
+	qz.Timer = &time.Timer{C: make(chan time.Time)}
+	qz.AnswerCh = make(chan string)
 
 	return qz
 }
@@ -39,25 +39,25 @@ func NewQuiz(qf QuizFile, randomizeP bool) *quiz {
 // If data arrives in the answer channel, increment score if answer is equal to problem.a and return true.
 func (qz *quiz) QuizHandler(pNum int) bool {
 	select {
-	case <-qz.timer.C:
+	case <-qz.Timer.C:
 		fmt.Println("#### time is over ####")
 		return false
-	case answer := <-qz.answerCh:
-		if answer == qz.problems[pNum].a {
-			qz.playerScore++
+	case answer := <-qz.AnswerCh:
+		if answer == qz.Problems[pNum].A {
+			qz.PlayerScore++
 		}
 	}
 	return true
 }
 
 func (qz *quiz) PrintScore() {
-	fmt.Printf("You scored %d out of %d.\n", qz.playerScore, qz.totalScore)
+	fmt.Printf("You scored %d out of %d.\n", qz.PlayerScore, qz.TotalScore)
 }
 
 // MakeQPTimer receives the duration of the timer in seconds (t).
 // If t is non-zero, creates a new timer with duration t
 func (qz *quiz) MakeQPTimer(t int) {
 	if t != 0 {
-		qz.timer = time.NewTimer(time.Duration(t) * time.Second)
+		qz.Timer = time.NewTimer(time.Duration(t) * time.Second)
 	}
 }
