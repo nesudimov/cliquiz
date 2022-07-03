@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -14,16 +15,9 @@ import (
 func main() {
 	quizFile, qTime, pTime, randomizeP := parseFlags()
 
-	content, err := os.ReadFile(quizFile)
+	file, err := defineQuizFile(quizFile)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	file := new(internal.CsvFile)
-	ext := strings.Split(quizFile, ".")
-	switch ext[len(ext)-1] {
-	case "csv":
-		file.R = csv.NewReader(strings.NewReader(string(content)))
 	}
 
 	q := internal.NewQuiz(file, randomizeP)
@@ -46,6 +40,30 @@ problemLoop:
 	}
 	q.PrintScore()
 
+}
+
+// defineQuizFile gets the path to the quiz file.
+// Determines the file extension and returns the required QuizFile
+func defineQuizFile(filePath string) (internal.QuizFile, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	ext := strings.Split(filePath, ".")
+
+	switch ext[len(ext)-1] {
+	case "json":
+		return &internal.JsonFile{
+			D: json.NewDecoder(strings.NewReader(string(content))),
+		}, nil
+	case "csv":
+		return &internal.CsvFile{
+			R: csv.NewReader(strings.NewReader(string(content))),
+		}, nil
+	default:
+		return nil, err
+	}
 }
 
 // parseFlags parses the cli flags from os.Args[1:] and return their values
