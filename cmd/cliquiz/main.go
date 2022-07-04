@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	i "github.com/nesudimov/cliquiz/internal"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -56,6 +57,10 @@ func defineQuizFile(filePath string) (i.QuizFile, error) {
 	case "json":
 		return &i.JsonFile{
 			D: json.NewDecoder(strings.NewReader(string(content))),
+		}, nil
+	case "yml":
+		return &i.YmlFile{
+			D: yaml.NewDecoder(strings.NewReader(string(content))),
 		}, nil
 	case "csv":
 		return &i.CsvFile{
