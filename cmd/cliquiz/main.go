@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	internal "github.com/nesudimov/cliquiz/internal"
+	i "github.com/nesudimov/cliquiz/internal"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	q := internal.NewQuiz(file, randomizeP)
+	q := i.NewQuiz(file, randomizeP)
 	q.MakeQPTimer(qTime)
 problemLoop:
 	for n, p := range q.Problems {
@@ -44,7 +44,7 @@ problemLoop:
 
 // defineQuizFile gets the path to the quiz file.
 // Determines the file extension and returns the required QuizFile
-func defineQuizFile(filePath string) (internal.QuizFile, error) {
+func defineQuizFile(filePath string) (i.QuizFile, error) {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -54,11 +54,11 @@ func defineQuizFile(filePath string) (internal.QuizFile, error) {
 
 	switch ext[len(ext)-1] {
 	case "json":
-		return &internal.JsonFile{
+		return &i.JsonFile{
 			D: json.NewDecoder(strings.NewReader(string(content))),
 		}, nil
 	case "csv":
-		return &internal.CsvFile{
+		return &i.CsvFile{
 			R: csv.NewReader(strings.NewReader(string(content))),
 		}, nil
 	default:
