@@ -16,5 +16,9 @@ func (jf *JsonFile) LoadProblem() ([]Problem, error) {
 		return nil, err
 	}
 
+	for _, p := range m.Problems {
+		p.S = len(p.A)
+	}
+
 	return m.Problems, nil
 }

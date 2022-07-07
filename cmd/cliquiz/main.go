@@ -28,7 +28,11 @@ problemLoop:
 
 		q.MakeQPTimer(pTime)
 
-		fmt.Printf("Problem #%d: %s = ", n+1, p.Q)
+		fmt.Print("--------------------------")
+		fmt.Printf("Problem #%d", n+1)
+		fmt.Print("--------------------------\n")
+		p.PrintProblem()
+
 		go func() {
 			var in string
 			fmt.Scanf("%s\n", &in)

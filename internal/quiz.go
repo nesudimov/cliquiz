@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -27,7 +28,7 @@ func NewQuiz(qf QuizFile, randomizeP bool) *quiz {
 	}
 
 	qz.PlayerScore = 0
-	qz.TotalScore = len(qz.Problems)
+	qz.LoadTotalScore()
 	qz.Timer = &time.Timer{C: make(chan time.Time)}
 	qz.AnswerCh = make(chan string)
 
@@ -43,13 +44,24 @@ func (qz *quiz) QuizHandler(pNum int) bool {
 		fmt.Println("#### time is over ####")
 		return false
 	case answer := <-qz.AnswerCh:
-		if answer == qz.Problems[pNum].A {
-			qz.PlayerScore++
+		score, err := qz.Problems[pNum].SolveProblem(answer)
+		if err != nil {
+			log.Fatal(err)
 		}
+		qz.PlayerScore += score
 	}
 	return true
 }
 
+// LoadTotalScore adds the score for each problem.
+// Writes the results of the addition to qz.TotalScore.
+func (qz *quiz) LoadTotalScore() {
+	for _, p := range qz.Problems {
+		qz.TotalScore += p.S
+	}
+}
+
+// PrintScore printed quiz score
 func (qz *quiz) PrintScore() {
 	fmt.Printf("You scored %d out of %d.\n", qz.PlayerScore, qz.TotalScore)
 }
