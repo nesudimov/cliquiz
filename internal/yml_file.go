@@ -16,8 +16,8 @@ func (yf *YmlFile) LoadProblem() ([]Problem, error) {
 		return nil, err
 	}
 
-	for _, p := range m.Problems {
-		p.S = len(p.A)
+	for i, p := range m.Problems {
+		m.Problems[i].S = len(p.A)
 	}
 
 	return m.Problems, nil
