@@ -17,11 +17,12 @@ func (cf *CsvFile) LoadProblem() ([]Problem, error) {
 	}
 
 	var p []Problem
-	var v []string
 	for _, pr := range problems {
-		if len(pr) == 3 {
+		var v []string
+		if len(pr[2]) != 0 {
 			v = strings.Split(strings.ToLower(pr[2]), ",")
 		}
+
 		a := strings.Split(strings.ToLower(pr[1]), ",")
 		p = append(
 			p,

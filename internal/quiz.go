@@ -32,6 +32,7 @@ func NewQuiz(qf QuizFile, randomizeP bool) *quiz {
 	qz.Timer = &time.Timer{C: make(chan time.Time)}
 	qz.AnswerCh = make(chan string)
 
+	fmt.Println("Debug:", qz.Problems)
 	return qz
 }
 

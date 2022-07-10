@@ -24,16 +24,23 @@ func (p *Problem) PrintProblem() {
 }
 
 func (p *Problem) SolveProblem(input string) (int, error) {
-	answer := strings.Split(input, ",")
+	answers := strings.Split(input, ",")
 	score := 0
 	var err error
-	for _, a := range answer {
-		v, err := strconv.Atoi(strings.TrimSpace(a))
-		if err != nil {
-			return score, err
+	var answer string
+	for _, a := range answers {
+
+		if len(p.V) > 0 {
+			v, err := strconv.Atoi(strings.TrimSpace(a))
+			if err != nil {
+				return score, err
+			}
+			answer = p.V[v-1]
+		} else {
+			answer = a
 		}
 
-		if Contains(p.A, p.V[v-1]) {
+		if Contains(p.A, answer) {
 			score += 1
 		}
 	}
