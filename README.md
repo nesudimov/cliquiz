@@ -1,1 +1,1 @@
-[![Go Report](https://goreportcard.com/report/github.com/nesudimov/cliquiz)](https://goreportcard.com/report/github.com/nesudimov/cliquiz)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nesudimov/cliquiz)](https://goreportcard.com/report/github.com/nesudimov/cliquiz)
